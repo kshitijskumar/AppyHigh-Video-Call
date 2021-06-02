@@ -17,7 +17,6 @@ import com.example.appyhighvideocall.databinding.ActivityCallBinding
 import com.google.android.material.snackbar.Snackbar
 import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtc.RtcEngine
-import io.agora.rtc.utils.AgoraUtils
 import io.agora.rtc.video.VideoCanvas
 import java.lang.Exception
 
@@ -40,7 +39,7 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    private var isCallInProgress: Boolean = false
+    private var isTimerOn: Boolean = false
     private var isMicEnabled: Boolean = true
     private var isVideoEnabled: Boolean = true
 
@@ -65,7 +64,6 @@ class CallActivity : AppCompatActivity() {
             runOnUiThread{
                 Log.d("CallActivity", "Onjoinsucess: uuid: $uid")
                 timerStart()
-                isCallInProgress = true
             }
         }
 
@@ -184,11 +182,13 @@ class CallActivity : AppCompatActivity() {
 
     private fun timerStart() {
         timer.start()
+        isTimerOn = true
         binding.progressbar.visibility = View.VISIBLE
     }
 
     private fun timerStop() {
         timer.cancel()
+        isTimerOn = false
         binding.progressbar.visibility = View.GONE
     }
 
@@ -232,6 +232,9 @@ class CallActivity : AppCompatActivity() {
         super.onDestroy()
         rtcEngine?.leaveChannel()
         RtcEngine.destroy()
+        if (isTimerOn) {
+            timerStop()
+        }
     }
 
 }
