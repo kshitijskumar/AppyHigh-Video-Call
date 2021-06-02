@@ -13,7 +13,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/localView"
@@ -25,14 +26,60 @@
         android:layout_margin="16dp"
         tools:background="@color/teal_700"/>
 
-    <Button
-        android:id="@+id/btnCutCall"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="End Call"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="18dp"/>
+        android:layout_marginBottom="18dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginEnd="48dp"
+        android:background="@drawable/bg_call_button_grey">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnMute"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_mic"
+                android:background="@color/light_grey"
+                android:layout_marginStart="18dp"
+                android:layout_marginEnd="18dp"/>
+            <ImageButton
+                android:id="@+id/btnEndCall"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_end_call"
+                android:background="@color/light_grey"
+                android:layout_marginStart="18dp"
+                android:layout_marginEnd="18dp"/>
+            <ImageButton
+                android:id="@+id/btnVideo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_vid"
+                android:background="@color/light_grey"
+                android:layout_marginStart="18dp"
+                android:layout_marginEnd="18dp"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <ProgressBar
+        android:id="@+id/progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

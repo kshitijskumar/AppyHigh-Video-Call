@@ -4,8 +4,12 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.appyhighvideocall.databinding.ActivityCallBinding
@@ -14,6 +18,9 @@ import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.video.VideoCanvas
 import java.lang.Exception
+
+const val WAITING_TIME = 15000L
+const val TICK_TIME = 1000L
 
 class CallActivity : AppCompatActivity() {
 
@@ -31,13 +38,33 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
+    private var isCallInProgress: Boolean = false
+    private var isMicEnabled: Boolean = true
+    private var isVideoEnables: Boolean = true
+
+    private val timer = object : CountDownTimer(WAITING_TIME, TICK_TIME) {
+        override fun onTick(millisUntilFinished: Long) {
+            Log.d("CallActivityTimer", "Time left: $millisUntilFinished")
+        }
+
+        override fun onFinish() {
+            Toast.makeText(this@CallActivity, "Sorry, no one joined the random call.", Toast.LENGTH_LONG).show()
+            finish()
+        }
+    }
+
     private var rtcEngine: RtcEngine? = null
 
     private val rtcEventHandler = object : IRtcEngineEventHandler() {
+
         override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
             super.onJoinChannelSuccess(channel, uid, elapsed)
 
-            runOnUiThread{ Log.d("CallActivity", "Onjoinsucess: uuid: $uid and Thread: ${Thread.currentThread().name}") }
+            runOnUiThread{
+                Log.d("CallActivity", "Onjoinsucess: uuid: $uid")
+                timerStart()
+                isCallInProgress = true
+            }
         }
 
         override fun onUserJoined(uid: Int, elapsed: Int) {
@@ -45,6 +72,15 @@ class CallActivity : AppCompatActivity() {
 
             runOnUiThread {
                 setupRemoteView(uid)
+                timerStop()
+            }
+        }
+
+        override fun onUserOffline(uid: Int, reason: Int) {
+            super.onUserOffline(uid, reason)
+
+            runOnUiThread {
+                timerStart()
             }
         }
 
@@ -56,7 +92,21 @@ class CallActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         requestPermission()
+        setupViews()
 
+    }
+
+    private fun setupViews() {
+        binding.btnMute.setOnClickListener {
+            toggleMic()
+        }
+        binding.btnEndCall.setOnClickListener {
+            endCall()
+        }
+    }
+
+    private fun endCall() {
+        finish()
     }
 
     private fun initEngineAndJoinChannel() {
@@ -99,6 +149,27 @@ class CallActivity : AppCompatActivity() {
         binding.remoteView.addView(surfaceView)
 
         rtcEngine?.setupRemoteVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, uid))
+    }
+
+    private fun toggleMic() {
+        if(isMicEnabled) {
+            binding.btnMute.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_mute_mic))
+
+        }else {
+            binding.btnMute.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_mic))
+        }
+        isMicEnabled = !isMicEnabled
+        rtcEngine?.muteLocalAudioStream(isMicEnabled)
+    }
+
+    private fun timerStart() {
+        timer.start()
+        binding.progressbar.visibility = View.VISIBLE
+    }
+
+    private fun timerStop() {
+        timer.cancel()
+        binding.progressbar.visibility = View.GONE
     }
 
     private fun requestPermission() {
