@@ -64,6 +64,8 @@ class CallActivity : AppCompatActivity() {
 
     private var rtcEngine: RtcEngine? = null
 
+
+    //callback to handle agora events for videocall
     private val rtcEventHandler = object : IRtcEngineEventHandler() {
 
         override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
@@ -88,6 +90,7 @@ class CallActivity : AppCompatActivity() {
             super.onUserOffline(uid, reason)
 
             runOnUiThread {
+                Toast.makeText(this@CallActivity, "The user left the call.", Toast.LENGTH_LONG).show()
                 timerStart()
             }
         }
@@ -105,6 +108,7 @@ class CallActivity : AppCompatActivity() {
         setupViews()
     }
 
+    //setup views and click listeners
     private fun setupViews() {
         binding.btnMute.setOnClickListener {
             toggleMic()
@@ -129,6 +133,7 @@ class CallActivity : AppCompatActivity() {
         getCurrentActiveTokenAndJoin()
     }
 
+    //initialises the rtc engine
     private fun initialiseEngine() {
         try {
             rtcEngine = RtcEngine.create(this, getString(R.string.agora_app_id), rtcEventHandler)
@@ -137,6 +142,7 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
+    //setup local view to show user video
     private fun setupLocalVideoView() {
         rtcEngine?.enableVideo()
         val surfaceView = RtcEngine.CreateRendererView(this)
@@ -146,17 +152,21 @@ class CallActivity : AppCompatActivity() {
         rtcEngine?.setupLocalVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, 0))
     }
 
+
+    //retrieves active agora token from firebase firestore, and if it is not null, then joins the corresponding channel
     private fun getCurrentActiveTokenAndJoin() = lifecycleScope.launch {
         val tokenInfo = repo.getCurrentActiveToken()
         if(tokenInfo == null) {
             Toast.makeText(this@CallActivity, "Token not found", Toast.LENGTH_LONG).show()
             finish()
         }else {
-            Log.d("CallActivity", "Active token is received")
+            Log.d("CallActivity", "Active token is $tokenInfo")
+            Log.d("CallActivity", "Thread is: ${Thread.currentThread().name}")
             joinChannel(tokenInfo)
         }
     }
 
+    //joins the channel with given token and name of the channel
     private fun joinChannel(tokenInfo: TokenInfo) {
         rtcEngine?.joinChannel(
             tokenInfo.token,
@@ -166,6 +176,7 @@ class CallActivity : AppCompatActivity() {
         )
     }
 
+    //set up remote view
     private fun setupRemoteView(uid: Int) {
         if(binding.remoteView.childCount > 1) {
             return
@@ -176,6 +187,7 @@ class CallActivity : AppCompatActivity() {
         rtcEngine?.setupRemoteVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, uid))
     }
 
+    //toggles the mic for mute and unmute
     private fun toggleMic() {
         if(isMicEnabled) {
             binding.btnMute.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_mute_mic))
@@ -187,6 +199,7 @@ class CallActivity : AppCompatActivity() {
         isMicEnabled = !isMicEnabled
     }
 
+    //toggles the camera for video on and video off
     private fun toggleVid() {
         if(isVideoEnabled) {
             binding.btnVideo.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_video_off))
@@ -199,18 +212,21 @@ class CallActivity : AppCompatActivity() {
     }
 
 
+    //starts the timer of 15sec to hold the user till someone joins.
     private fun timerStart() {
         timer.start()
         isTimerOn = true
         binding.progressbar.visibility = View.VISIBLE
     }
 
+    //stops the timer when someone on the remote side joins the same channel
     private fun timerStop() {
         timer.cancel()
         isTimerOn = false
         binding.progressbar.visibility = View.GONE
     }
 
+    //checks whether the permissions are grantd or not, if not then asks for those permissions
     private fun requestPermission() {
         val isCameraPermGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
         val isAudioPermGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
@@ -246,7 +262,7 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-
+    //when this activity destroys, leave the channel, destroy Rtc and checks if timer is running then stops that timer
     override fun onDestroy() {
         super.onDestroy()
         rtcEngine?.leaveChannel()
