@@ -13,11 +13,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.appyhighvideocall.data.Repository
+import com.example.appyhighvideocall.data.TokenInfo
 import com.example.appyhighvideocall.databinding.ActivityCallBinding
 import com.google.android.material.snackbar.Snackbar
 import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.video.VideoCanvas
+import kotlinx.coroutines.launch
 import java.lang.Exception
 
 const val WAITING_TIME = 15000L
@@ -27,6 +31,10 @@ class CallActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCallBinding
     private val permissionsList = mutableListOf<String>()
+
+    private val repo by lazy {
+        Repository()
+    }
 
     private val resultPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -118,7 +126,7 @@ class CallActivity : AppCompatActivity() {
     private fun initEngineAndJoinChannel() {
         initialiseEngine()
         setupLocalVideoView()
-        joinChannel()
+        getCurrentActiveTokenAndJoin()
     }
 
     private fun initialiseEngine() {
@@ -138,10 +146,21 @@ class CallActivity : AppCompatActivity() {
         rtcEngine?.setupLocalVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, 0))
     }
 
-    private fun joinChannel() {
+    private fun getCurrentActiveTokenAndJoin() = lifecycleScope.launch {
+        val tokenInfo = repo.getCurrentActiveToken()
+        if(tokenInfo == null) {
+            Toast.makeText(this@CallActivity, "Token not found", Toast.LENGTH_LONG).show()
+            finish()
+        }else {
+            Log.d("CallActivity", "Active token is received")
+            joinChannel(tokenInfo)
+        }
+    }
+
+    private fun joinChannel(tokenInfo: TokenInfo) {
         rtcEngine?.joinChannel(
-            getString(R.string.agora_temp_token),
-            "AppyHigh",
+            tokenInfo.token,
+            tokenInfo.name,
             "info",
             0
         )

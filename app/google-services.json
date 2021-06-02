@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "278060991896",
+    "firebase_url": "https://learning-firebase-f7960.firebaseio.com",
+    "project_id": "learning-firebase-f7960",
+    "storage_bucket": "learning-firebase-f7960.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278060991896:android:1c9636d6143617d80817ed",
+        "android_client_info": {
+          "package_name": "com.example.appyhighvideocall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "278060991896-lruo7rvicgl8f2hihpibc131mjcrv7mv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBwt3k4QZ9HblaPbXksZS-cB_8QeGwpjk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278060991896-lruo7rvicgl8f2hihpibc131mjcrv7mv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278060991896:android:6024b1fb4d1945b30817ed",
+        "android_client_info": {
+          "package_name": "com.example.learningfirebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "278060991896-lruo7rvicgl8f2hihpibc131mjcrv7mv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBwt3k4QZ9HblaPbXksZS-cB_8QeGwpjk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278060991896-lruo7rvicgl8f2hihpibc131mjcrv7mv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
