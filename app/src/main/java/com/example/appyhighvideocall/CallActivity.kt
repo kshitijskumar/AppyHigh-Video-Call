@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
@@ -16,6 +17,7 @@ import com.example.appyhighvideocall.databinding.ActivityCallBinding
 import com.google.android.material.snackbar.Snackbar
 import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtc.RtcEngine
+import io.agora.rtc.utils.AgoraUtils
 import io.agora.rtc.video.VideoCanvas
 import java.lang.Exception
 
@@ -40,7 +42,7 @@ class CallActivity : AppCompatActivity() {
 
     private var isCallInProgress: Boolean = false
     private var isMicEnabled: Boolean = true
-    private var isVideoEnables: Boolean = true
+    private var isVideoEnabled: Boolean = true
 
     private val timer = object : CountDownTimer(WAITING_TIME, TICK_TIME) {
         override fun onTick(millisUntilFinished: Long) {
@@ -91,15 +93,21 @@ class CallActivity : AppCompatActivity() {
         binding = ActivityCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         requestPermission()
         setupViews()
-
     }
 
     private fun setupViews() {
         binding.btnMute.setOnClickListener {
             toggleMic()
         }
+
+        binding.btnVideo.setOnClickListener {
+            toggleVid()
+        }
+
         binding.btnEndCall.setOnClickListener {
             endCall()
         }
@@ -158,9 +166,21 @@ class CallActivity : AppCompatActivity() {
         }else {
             binding.btnMute.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_mic))
         }
-        isMicEnabled = !isMicEnabled
         rtcEngine?.muteLocalAudioStream(isMicEnabled)
+        isMicEnabled = !isMicEnabled
     }
+
+    private fun toggleVid() {
+        if(isVideoEnabled) {
+            binding.btnVideo.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_video_off))
+
+        }else {
+            binding.btnVideo.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_vid))
+        }
+        rtcEngine?.muteLocalVideoStream(isVideoEnabled)
+        isVideoEnabled = !isVideoEnabled
+    }
+
 
     private fun timerStart() {
         timer.start()
