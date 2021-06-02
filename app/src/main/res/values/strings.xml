@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">AppyHigh VideoCall</string>
     <string name="agora_app_id">f96e450a4cf54ddbba520474189b6142</string>
+    <string name="agora_temp_token">006f96e450a4cf54ddbba520474189b6142IAB5Qj+2gLa3Zvx+8nHpKoP4QLBiswbwNYM9wSb2NH4QVDnW7uMAAAAAEAD7cHweAMO4YAEAAQD/wrhg</string>
 </resources>

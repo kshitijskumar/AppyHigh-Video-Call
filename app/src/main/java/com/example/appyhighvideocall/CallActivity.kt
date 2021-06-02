@@ -4,12 +4,16 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.appyhighvideocall.databinding.ActivityCallBinding
 import com.google.android.material.snackbar.Snackbar
+import io.agora.rtc.IRtcEngineEventHandler
+import io.agora.rtc.RtcEngine
+import io.agora.rtc.video.VideoCanvas
+import java.lang.Exception
 
 class CallActivity : AppCompatActivity() {
 
@@ -27,6 +31,25 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
+    private var rtcEngine: RtcEngine? = null
+
+    private val rtcEventHandler = object : IRtcEngineEventHandler() {
+        override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
+            super.onJoinChannelSuccess(channel, uid, elapsed)
+
+            runOnUiThread{ Log.d("CallActivity", "Onjoinsucess: uuid: $uid and Thread: ${Thread.currentThread().name}") }
+        }
+
+        override fun onUserJoined(uid: Int, elapsed: Int) {
+            super.onUserJoined(uid, elapsed)
+
+            runOnUiThread {
+                setupRemoteView(uid)
+            }
+        }
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCallBinding.inflate(layoutInflater)
@@ -34,6 +57,48 @@ class CallActivity : AppCompatActivity() {
 
         requestPermission()
 
+    }
+
+    private fun initEngineAndJoinChannel() {
+        initialiseEngine()
+        setupLocalVideoView()
+        joinChannel()
+    }
+
+    private fun initialiseEngine() {
+        try {
+            rtcEngine = RtcEngine.create(this, getString(R.string.agora_app_id), rtcEventHandler)
+        }catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun setupLocalVideoView() {
+        rtcEngine?.enableVideo()
+        val surfaceView = RtcEngine.CreateRendererView(this)
+        surfaceView.setZOrderMediaOverlay(true)
+        binding.localView.addView(surfaceView)
+
+        rtcEngine?.setupLocalVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, 0))
+    }
+
+    private fun joinChannel() {
+        rtcEngine?.joinChannel(
+            getString(R.string.agora_temp_token),
+            "AppyHigh",
+            "info",
+            0
+        )
+    }
+
+    private fun setupRemoteView(uid: Int) {
+        if(binding.remoteView.childCount > 1) {
+            return
+        }
+        val surfaceView = RtcEngine.CreateRendererView(this)
+        binding.remoteView.addView(surfaceView)
+
+        rtcEngine?.setupRemoteVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, uid))
     }
 
     private fun requestPermission() {
@@ -71,7 +136,11 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    private fun initEngineAndJoinChannel() {
 
+    override fun onDestroy() {
+        super.onDestroy()
+        rtcEngine?.leaveChannel()
+        RtcEngine.destroy()
     }
+
 }
