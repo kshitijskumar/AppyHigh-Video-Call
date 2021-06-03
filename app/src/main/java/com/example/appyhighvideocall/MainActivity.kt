@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.appyhighvideocall.databinding.ActivityMainBinding
+import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 
 class MainActivity : AppCompatActivity() {
@@ -15,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        MobileAds.initialize(this)
+        setupAds()
         setupViews()
     }
 
@@ -24,5 +25,12 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, CallActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    private fun setupAds() {
+        MobileAds.initialize(this)
+        val adRequest = AdRequest.Builder().build()
+        binding.adView.loadAd(adRequest)
+
     }
 }
